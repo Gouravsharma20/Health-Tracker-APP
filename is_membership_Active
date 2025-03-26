@@ -1,0 +1,9 @@
+from datetime import datetime, timedelta
+from utils import MEMBERSHIP_DURATIONS
+
+def is_membership_active(client_last_payment_date, membership_type):
+    if not client_last_payment_date:
+        return False  # No payment made yet
+
+    expiry_date = client_last_payment_date + timedelta(days=MEMBERSHIP_DURATIONS[membership_type])
+    return datetime.today().date() <= expiry_date
