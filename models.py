@@ -1,90 +1,141 @@
-from sqlalchemy import Boolean, Column, Integer, String, Enum, Date, ForeignKey, Float, Time
+from sqlalchemy import Boolean, Column, Integer, String, Enum, Date, ForeignKey, Float, Time , Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
 from pydantic import BaseModel
 import enum
 from datetime import date
 from database import Base
+from sqlalchemy.ext.hybrid import hybrid_property
 
+# Used Int instead of string (Space-Management) 
+class GenderEnum(enum.Enum):
+    MALE = 1
+    FEMALE = 2
+    OTHER = 3
 
-class GenderEnum(str, enum.Enum):
-    MALE = "Male"
-    FEMALE = "Female"
-    OTHER = "Other"
+class MembershipTypeEnum(enum.Enum):
+    TRIAL = 1
+    MONTHLY = 2
+    QUARTERLY = 3
+    HALFYEARLY = 4
+    ANNUALLY = 5
 
-class MembershipTypeEnum(str, enum.Enum):
-    TRIAL = "Trial"
-    MONTHLY = "Monthly"
-    QUARTERLY = "Quarterly"
-    HALFYEARLY = "HalfYearly"
-    ANNUALLY = "Annually"
+class DietTypeEnum(enum.Enum):
+    VEGAN = 1
+    VEG = 2
+    NONVEG = 3
+    EGG = 4
+    ALL = 5
 
-class DietTypeEnum(str, enum.Enum):
-    VEG = "Veg"
-    NONVEG = "Nonveg"
-    EGG = "Egg"
-    VEGAN = "Vegan"
-    ALL = "All"
-
-class WorkoutPlanEnum(str, enum.Enum):
-    WEIGHT_LOSS = "Weight Loss"
-    MUSCLE_GAIN = "Muscle Gain"
-    GENERAL_FITNESS = "General Fitness"
-    CARDIO_ONLY = "Cardio Only"
+class WorkoutPlanEnum(enum.Enum):
+    GENERAL_FITNESS = 1
+    WEIGHT_LOSS = 2
+    MUSCLE_GAIN = 3
+    CARDIO_ONLY = 4
 
     
-class ClientType(str, enum.Enum):
-    SEVERELY_UNDERWEIGHT = "Severely Underweight"
-    UNDERWEIGHT = "Underweight"
-    NORMAL = "Normal"
-    OVERWEIGHT = "Overweight"
-    OBESITY_CLASS1 = "Obesity Class 1"
-    OBESITY_CLASS2 = "Obesity Class 2"
-    OBESITY_CLASS3 = "Obesity Class 3"
+class ClientType(enum.Enum):
+    SEVERELY_UNDERWEIGHT = 1
+    UNDERWEIGHT = 2
+    NORMAL = 3
+    OVERWEIGHT = 4
+    OBESITY_CLASS1 = 5
+    OBESITY_CLASS2 = 6
+    OBESITY_CLASS3 = 7
 
 
-class Trainers(Base):
-    __tablename__ = "Trainers"
+# Association Tables for Many-to-Many Relations
+client_workout_association = Table(
+    "client_workout_association",
+    Base.metadata,
+    Column("client_id", Integer, ForeignKey("clients.client_id")),
+    Column("workout_id", Integer, ForeignKey("workouts.workout_id")),
+)
+
+client_diet_association = Table(
+    "client_diet_association",
+    Base.metadata,
+    Column("client_id", Integer, ForeignKey("clients.client_id")),
+    Column("diet_id", Integer, ForeignKey("diets.diet_id")),
+)
+
+# Trainers Table
+class Trainer(Base):
+    __tablename__ = "trainers"
+
     trainer_id = Column(Integer, primary_key=True, index=True)
+    trainer_name = Column(String(50), nullable=False)
+    specialization = Column(String(100), nullable=True)  # e.g., "Strength Training, Cardio"
+    experience_years = Column(Integer, nullable=True)
     clients = relationship("Client", back_populates="trainer")
-    # other columns...
 
 
 
+
+# Clients Table
 class Client(Base):
-    __tablename__ = "Clients"
+    __tablename__ = "clients"
 
     client_id = Column(Integer, primary_key=True, index=True)
-    client_name = Column(String(50), nullable=True)
-    client_username = Column(String(50), unique=True, index=True, nullable=True)
-    client_phonenumber = Column(Integer, unique=True, index=True, nullable=True)
-    client_gender = Column(Enum(GenderEnum), nullable=True)
-    client_dob = Column(Date, nullable=True)
-    client_join_date = Column(Date, nullable=True, default=date.today)
-    client_diet_type = Column(Enum(DietTypeEnum), nullable=True)
-    client_nonveg_days = Column(JSON, nullable=True)  # JSON column for multiple days
-    client_last_payment_date = Column(Date, nullable=True)
-    client_membership_active = Column(Boolean, default=True)
-    client_weight = Column(Float, nullable=True)
+    client_name = Column(String(50), nullable=False)
+    client_username = Column(String(50), unique=True, index=True, nullable=False)
+    client_email = Column(String(100), unique=True, nullable=False, index=True)
+    client_phonenumber = Column(String(15), unique=True, index=True, nullable=False)
+    client_gender = Column(Enum(GenderEnum), nullable=False)
+    client_dob = Column(Date, nullable=False)
+    client_join_date = Column(Date, nullable=False, default=date.today)
+
     client_height = Column(Float, nullable=True)
-    client_membership_expiry_date = Column(Date, nullable=True)
-    client_workout_plan = Column(Enum(WorkoutPlanEnum), nullable=True)
-    client_BMI = Column(Float, nullable=True)
-    client_Bmi_Category = Column(Enum(ClientType),nullable = True)
+    client_weight = Column(Float, nullable=True)
 
-    
     # Foreign Keys
-    client_trainer_id = Column(Integer, ForeignKey("Trainers.trainer_id"), nullable=True)
-    client_referred_by = Column(Integer, ForeignKey("Clients.client_id"), nullable=True)
+    client_trainer_id = Column(Integer, ForeignKey("trainers.trainer_id", ondelete="SET NULL"), nullable=True)
+    
+    # Relationships
+    trainer = relationship("Trainer", back_populates="clients")
+    memberships = relationship("Membership", back_populates="client")
+    payments = relationship("Payment", back_populates="client")
+    workouts = relationship("Workout", secondary=client_workout_association, back_populates="clients")
+    diets = relationship("Diet", secondary=client_diet_association, back_populates="clients")
+
+    @hybrid_property
+    def client_BMI(self):
+        if self.client_height and self.client_weight:
+            return round(self.client_weight / ((self.client_height / 100) ** 2), 2)
+        return None
+    
+    
+
+# Payments Table
+class Payment(Base):
+    __tablename__ = "payments"
+
+    payment_id = Column(Integer, primary_key=True, index=True)
+    client_id = Column(Integer, ForeignKey("clients.client_id", ondelete="CASCADE"), nullable=False)
+    amount = Column(Float, nullable=False)
+    payment_date = Column(Date, nullable=False, default=date.today)
+    payment_method = Column(String(50), nullable=False)  # e.g., "Credit Card", "UPI", "Cash"
+
+    client = relationship("Client", back_populates="payments")
 
 
-    # Additional Fields
-    client_email = Column(String(100), unique=True, nullable=True, index=True)
-    client_emergency_contact = Column(String(10), nullable=True)
-    client_goal = Column(String(200), nullable=True)
-    client_workout_time = Column(Time, nullable=True)  # Stores HH:MM:SS format
-    client_medical_conditions = Column(String(200), nullable=True)
+# Workouts Table
+class Workout(Base):
+    __tablename__ = "workouts"
 
-"""    # Relationships
-    trainer = relationship("Trainers", back_populates="clients")
-    referred_by_client = relationship("Client", remote_side=[client_id], backref="referred_clients")  # Self-referencing relationship"""
+    workout_id = Column(Integer, primary_key=True, index=True)
+    workout_name = Column(String(50), nullable=False)
+    difficulty_level = Column(String(50), nullable=False)  # e.g., "Beginner", "Intermediate", "Advanced"
+    duration_minutes = Column(Integer, nullable=False)  # Workout duration
+
+    clients = relationship("Client", secondary=client_workout_association, back_populates="workouts")
+
+# Diets Table
+class Diet(Base):
+    __tablename__ = "diets"
+
+    diet_id = Column(Integer, primary_key=True, index=True)
+    diet_type = Column(Enum(DietTypeEnum), nullable=False)
+    meal_plan = Column(String(200), nullable=False)  # e.g., "Breakfast: Oats, Lunch: Rice & Chicken"
+
+    clients = relationship("Client", secondary=client_diet_association, back_populates="diets")

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, Float, Enum
+"""from sqlalchemy import Column, Integer, String, Date, Float, Enum
 from database import Base
 
 class Owner(Base):
@@ -27,4 +27,4 @@ class Owner(Base):
     total_trainers = Column(Integer, default=0)  # Number of trainers
     
     gym_opening_time = Column(String, nullable=False)  # Example: "06:00 AM"
-    gym_closing_time = Column(String, nullable=False)  # Example: "10:00 PM"
+    gym_closing_time = Column(String, nullable=False)  # Example: "10:00 PM" """
