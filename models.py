@@ -7,6 +7,15 @@ from datetime import date
 from database import Base
 from sqlalchemy.ext.hybrid import hybrid_property
 
+# Enum for Membership Types
+class MembershipTypeEnum(enum.Enum):
+    TRIAL = 1
+    MONTHLY = 2
+    QUARTERLY = 3
+    HALFYEARLY = 4
+    ANNUALLY = 5
+
+
 # Used Int instead of string (Space-Management) 
 class GenderEnum(enum.Enum):
     MALE = 1

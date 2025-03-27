@@ -2,21 +2,21 @@ from models import ClientType
 
 
 
-def classify_client(weight: float, height: float) -> ClientType:
+def classify_client(weight: float, height: float) ->str:
     bmi = weight / (height ** 2)  # Calculate BMI
     
     if bmi < 16.0:
-        return ClientType.SEVERELY_UNDERWEIGHT
+        return "🦴 Skeleton Mode Activated (Severely Underweight)"
     elif 16.0 <= bmi < 18.5:
-        return ClientType.UNDERWEIGHT
+        return "🍃 Light as a Feather (Underweight)"
     elif 18.5 <= bmi < 25.0:
-        return ClientType.NORMAL
+        return "💪 Peak Performance (Normal Range)"
     elif 25.0 <= bmi < 30.0:
-        return ClientType.OVERWEIGHT
+        return "🍔 Enjoying Life (Overweight)"
     elif 30.0 <= bmi < 35.0:
-        return ClientType.OBESITY_CLASS1
+        return "⚠️ Extra Cushioning (Obesity Class 1)"
     elif 35.0 <= bmi < 40.0:
-        return ClientType.OBESITY_CLASS2
+        return "🔥 Heavyweight Champ (Obesity Class 2)"
     else:
-        return ClientType.OBESITY_CLASS3
+        return "🚀 Big Boss Level (Obesity Class 3)"
 
