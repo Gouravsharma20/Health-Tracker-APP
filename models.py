@@ -6,6 +6,7 @@ import enum
 from datetime import date
 from database import Base
 
+
 class GenderEnum(str, enum.Enum):
     MALE = "Male"
     FEMALE = "Female"
@@ -33,7 +34,7 @@ class WorkoutPlanEnum(str, enum.Enum):
 
     
 class ClientType(str, enum.Enum):
-    SEVERELYUNDERWEIGHT = "Severely Underweight"
+    SEVERELY_UNDERWEIGHT = "Severely Underweight"
     UNDERWEIGHT = "Underweight"
     NORMAL = "Normal"
     OVERWEIGHT = "Overweight"
@@ -45,6 +46,7 @@ class ClientType(str, enum.Enum):
 class Trainers(Base):
     __tablename__ = "Trainers"
     trainer_id = Column(Integer, primary_key=True, index=True)
+    clients = relationship("Client", back_populates="trainer")
     # other columns...
 
 
@@ -53,13 +55,13 @@ class Client(Base):
     __tablename__ = "Clients"
 
     client_id = Column(Integer, primary_key=True, index=True)
-    client_name = Column(String(50), nullable=False)
-    client_username = Column(String(50), unique=True, index=True, nullable=False)
-    client_phonenumber = Column(String(10), unique=True, index=True, nullable=False)
-    client_gender = Column(Enum(GenderEnum), nullable=False)
-    client_dob = Column(Date, nullable=False)
-    client_join_date = Column(Date, nullable=False, default=date.today)
-    client_diet_type = Column(Enum(DietTypeEnum), nullable=False)
+    client_name = Column(String(50), nullable=True)
+    client_username = Column(String(50), unique=True, index=True, nullable=True)
+    client_phonenumber = Column(Integer, unique=True, index=True, nullable=True)
+    client_gender = Column(Enum(GenderEnum), nullable=True)
+    client_dob = Column(Date, nullable=True)
+    client_join_date = Column(Date, nullable=True, default=date.today)
+    client_diet_type = Column(Enum(DietTypeEnum), nullable=True)
     client_nonveg_days = Column(JSON, nullable=True)  # JSON column for multiple days
     client_last_payment_date = Column(Date, nullable=True)
     client_membership_active = Column(Boolean, default=True)
@@ -67,10 +69,14 @@ class Client(Base):
     client_height = Column(Float, nullable=True)
     client_membership_expiry_date = Column(Date, nullable=True)
     client_workout_plan = Column(Enum(WorkoutPlanEnum), nullable=True)
+    client_BMI = Column(Float, nullable=True)
+    client_Bmi_Category = Column(Enum(ClientType),nullable = True)
+
     
     # Foreign Keys
     client_trainer_id = Column(Integer, ForeignKey("Trainers.trainer_id"), nullable=True)
     client_referred_by = Column(Integer, ForeignKey("Clients.client_id"), nullable=True)
+
 
     # Additional Fields
     client_email = Column(String(100), unique=True, nullable=True, index=True)
@@ -79,6 +85,6 @@ class Client(Base):
     client_workout_time = Column(Time, nullable=True)  # Stores HH:MM:SS format
     client_medical_conditions = Column(String(200), nullable=True)
 
-    # Relationships
-    trainer = relationship("Trainer", back_populates="clients")
-    referred_by_client = relationship("Client", remote_side=[client_id])  # Self-referencing relationship
+"""    # Relationships
+    trainer = relationship("Trainers", back_populates="clients")
+    referred_by_client = relationship("Client", remote_side=[client_id], backref="referred_clients")  # Self-referencing relationship"""

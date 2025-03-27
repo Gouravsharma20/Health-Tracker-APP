@@ -14,9 +14,9 @@ def classify_client(weight: float, height: float) -> ClientType:
     elif 25.0 <= bmi < 30.0:
         return ClientType.OVERWEIGHT
     elif 30.0 <= bmi < 35.0:
-        return ClientType.OBESITY_CLASS_1
+        return ClientType.OBESITY_CLASS1
     elif 35.0 <= bmi < 40.0:
-        return ClientType.OBESITY_CLASS_2
+        return ClientType.OBESITY_CLASS2
     else:
-        return ClientType.OBESITY_CLASS_3
+        return ClientType.OBESITY_CLASS3
 
