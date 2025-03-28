@@ -1,11 +1,30 @@
 from sqlalchemy import Boolean, Column, Integer, String, Enum, Date, ForeignKey, Float, Time , Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 import enum
 from datetime import date
 from database import Base
 from sqlalchemy.ext.hybrid import hybrid_property
+from mdr_utils import MDR_RATES,calculate_final_amount
+
+# Display available payment methods
+print("Available Payment Methods:")
+for method in MDR_RATES.keys():
+    print(f"- {method}")
+
+# Get user input
+amount = float(input("\nEnter the transaction amount: ₹"))
+payment_method = input("Enter the payment method: ").strip()
+
+if payment_method in MDR_RATES:
+    final_amount = calculate_final_amount(amount, payment_method)
+    mdr_percentage = MDR_RATES[payment_method] * 100
+    print(f"\nOriginal Amount: ₹{amount}")
+    print(f"MDR for {payment_method}: {mdr_percentage}%")
+    print(f"Final Amount after MDR: ₹{final_amount}")
+else:
+    print("\nInvalid payment method. Please try again.")
 
 # Enum for Membership Types
 class MembershipTypeEnum(enum.Enum):
@@ -75,8 +94,8 @@ class Trainer(Base):
     trainer_id = Column(Integer, primary_key=True, index=True)
     trainer_name = Column(String(50), nullable=False)
     specialization = Column(String(100), nullable=True)  # e.g., "Strength Training, Cardio"
-    experience_years = Column(Integer, nullable=True)
-    clients = relationship("Client", back_populates="trainer")
+    experience_years = Column(int = Field(...,ge=0,le=50), nullable=True)
+    clients = relationship("Client", back_populates="trainer") # One to many relation (one trainer can have multiple clients)
 
 
 
@@ -121,13 +140,19 @@ class Payment(Base):
 
     payment_id = Column(Integer, primary_key=True, index=True)
     client_id = Column(Integer, ForeignKey("clients.client_id", ondelete="CASCADE"), nullable=False)
-    amount = Column(Float, nullable=False)
+    amount = Column(Float, nullable=False)  # Original transaction amount
     payment_date = Column(Date, nullable=False, default=date.today)
     payment_method = Column(String(50), nullable=False)  # e.g., "Credit Card", "UPI", "Cash"
+    final_amount = Column(Float, nullable=False)  # Amount after MDR
+    mdr_fee = Column(Float, nullable=False)  # MDR Fee
 
     client = relationship("Client", back_populates="payments")
 
-
+    def __init__(self, client_id, amount, payment_method):
+        self.client_id = client_id
+        self.amount = amount
+        self.payment_method = payment_method
+        self.final_amount, self.mdr_fee = calculate_final_amount(amount, payment_method)
 # Workouts Table
 class Workout(Base):
     __tablename__ = "workouts"
