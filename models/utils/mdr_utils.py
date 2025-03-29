@@ -15,8 +15,8 @@ MDR_RATES = {
 }
 
 def calculate_final_amount(amount, payment_method):
+    """Calculates the final amount after applying MDR fees."""
     mdr = MDR_RATES.get(payment_method, 0)
     mdr_fee = amount * mdr
     final_amount = amount + mdr_fee
     return round(final_amount, 2), round(mdr_fee, 2)
-

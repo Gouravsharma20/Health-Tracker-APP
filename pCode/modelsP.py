@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Enum, Date, ForeignKey, Float, Time , Table
+"""from sqlalchemy import Boolean, Column, Integer, String, Enum, Date, ForeignKey, Float, Time , Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
 from pydantic import BaseModel,Field
@@ -93,7 +93,7 @@ class Trainer(Base):
 
     trainer_id = Column(Integer, primary_key=True, index=True)
     trainer_name = Column(String(50), nullable=False)
-    specialization = Column(String(100), nullable=True)  # e.g., "Strength Training, Cardio"
+    specialization = Column(Enum(WorkoutPlanEnum), nullable=True)  # e.g., "Strength Training, Cardio"
     experience_years = Column(int = Field(...,ge=0,le=50), nullable=True)
     clients = relationship("Client", back_populates="trainer") # One to many relation (one trainer can have multiple clients)
 
@@ -172,4 +172,5 @@ class Diet(Base):
     diet_type = Column(Enum(DietTypeEnum), nullable=False)
     meal_plan = Column(String(200), nullable=False)  # e.g., "Breakfast: Oats, Lunch: Rice & Chicken"
 
-    clients = relationship("Client", secondary=client_diet_association, back_populates="diets")
+    clients = relationship("Client", secondary=client_diet_association, back_populates="diets")"
+"""
