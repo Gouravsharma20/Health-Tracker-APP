@@ -13,6 +13,16 @@ app = FastAPI()
 app.include_router(customer_routes.router, prefix="/customer", tags=["Customer"])
 app.include_router(trainer_routes.router, prefix="/trainer", tags=["Trainer"])
 app.include_router(owner_routes.router, prefix="/owner", tags=["Owner"])
+
+@app.get("/health", response_class=PlainTextResponse)
+def health_check(): 
+    """
+    Health check endpoint to verify if the server is running.
+    """
+    return "Fitness Management System is running!"
+
+
+
 @app.get("/", response_class=HTMLResponse)
 def home():
     html_content = """
