@@ -17,7 +17,7 @@ class Client(Base):
     __tablename__ = "clients"
 
     id = Column(Integer, primary_key=True, index=True)  # Unique client ID
-    name = Column(String, nullable=False)  # Client name
+    name = Column(String(25), nullable=False)  # Client name
     age = Column(Integer, nullable=False)  # Client age
     weight = Column(Float, nullable=False) # Client weight
     height = Column(Float, nullable=False) # Client height

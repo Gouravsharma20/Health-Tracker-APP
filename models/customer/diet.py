@@ -9,7 +9,7 @@ class Diet(Base):
 
     id = Column(Integer, primary_key=True, index=True)  # Unique diet ID
     client_id = Column(Integer, ForeignKey("clients.id"))  # Foreign key for client
-    diet_plan = Column(String, nullable=False)  # Diet plan details
+    diet_plan = Column(String(12), nullable=False)  # Diet plan details
 
     # Relationship with Client model
     client = relationship("Client", back_populates="diet")

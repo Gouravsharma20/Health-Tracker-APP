@@ -9,7 +9,7 @@ class Workout(Base):
 
     id = Column(Integer, primary_key=True, index=True)  # Unique workout ID
     trainer_id = Column(Integer, ForeignKey("trainers.id"))  # Assigned trainer
-    workout_type = Column(String, nullable=False)  # Type of workout
+    workout_type = Column(String(20), nullable=False)  # Type of workout
 
     # Relationship with Trainer model
     trainer = relationship("Trainer", back_populates="workouts")

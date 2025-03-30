@@ -1,4 +1,4 @@
-"""from sqlalchemy import Boolean, Column, Integer, String, Enum, Date, ForeignKey, Float, Time , Table
+"""from sqlalchemy import Boolean, Column, Integer, String(20), Enum, Date, ForeignKey, Float, Time , Table
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSON
 from pydantic import BaseModel,Field
@@ -107,7 +107,7 @@ class Client(Base):
     client_id = Column(Integer, primary_key=True, index=True)
     client_name = Column(String(50), nullable=False)
     client_username = Column(String(50), unique=True, index=True, nullable=False)
-    client_email = Column(String(100), unique=True, nullable=False, index=True)
+    client_email = Column(String(20)(100), unique=True, nullable=False, index=True)
     client_phonenumber = Column(String(15), unique=True, index=True, nullable=False)
     client_gender = Column(Enum(GenderEnum), nullable=False)
     client_dob = Column(Date, nullable=False)
