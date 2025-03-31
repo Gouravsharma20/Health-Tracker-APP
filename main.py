@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse
 # Creating all database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app= FastAPI()
 
 # Including routers for API endpoint
 app.include_router(customer_routes.router, prefix="/customer", tags=["Customer"])

@@ -11,6 +11,9 @@ router = APIRouter()
 def get_clients(db: Session = Depends(get_db)):
     return db.query(Client).all()
 
+
+
+
 @router.get("/diets/")
 def get_diets(db: Session = Depends(get_db)):
     return db.query(Diet).all()

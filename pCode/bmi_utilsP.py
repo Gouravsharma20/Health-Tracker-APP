@@ -1,4 +1,4 @@
-from models import ClientType
+"""from models import ClientType
 
 
 
@@ -18,5 +18,5 @@ def classify_client(weight: float, height: float) ->str:
     elif 35.0 <= bmi < 40.0:
         return "🔥 Heavyweight Champ (Obesity Class 2)"
     else:
-        return "🚀 Big Boss Level (Obesity Class 3)"
+        return "🚀 Big Boss Level (Obesity Class 3)"""""
 

@@ -1,0 +1,39 @@
+# version: '3.8'  # <-- REMOVE THIS LINE - it's obsolete
+
+services:
+  fastapi-app:
+    build: .
+    container_name: fastapi-app
+    depends_on:
+      db: # Use the service name 'db' here
+        condition: service_healthy # Correctly waits for the healthcheck
+    ports:
+      - "8000:8000"
+    environment:
+      # This correctly uses the service name 'db' as the hostname
+      - DATABASE_URL=mysql+pymysql://root:Gourav12345@db:3306/healthTrackerApp
+    volumes:
+      - .:/app
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] # Added --reload for dev
+
+  db: # <-- This is the service name used in DATABASE_URL and depends_on
+    image: mysql:latest
+    container_name: mysql-db # This is just the container name, not the network hostname
+    restart: always
+    healthcheck:
+      # Use the environment variable directly in the healthcheck
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 20s
+      retries: 10
+      start_period: 10s # Give MySQL some time to initialize before first check
+    environment:
+      MYSQL_ROOT_PASSWORD: Gourav12345
+      MYSQL_DATABASE: healthTrackerApp
+    ports:
+      - "3306:3306" # Maps host 3306 to container 3306 (optional for app, good for external tools)
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
