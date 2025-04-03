@@ -75,4 +75,4 @@ def home():
     </body>
     </html>
     """
-    return html_content # returned HTML content
+    return html_content # returned HTML contents
