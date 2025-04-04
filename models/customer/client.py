@@ -11,6 +11,9 @@ class GenderEnum(str, PyEnum):
     MALE = "Male"
     FEMALE = "Female"
     OTHER = "Other"
+    def __str__(self):
+        return self.value  # ✅ Ensure correct Enum conversion
+
 
 # ORM Model for Client table
 class Client(Base):

@@ -4,6 +4,9 @@ from dependencies import get_db
 from models.customer.client import Client
 from models.customer.diet import Diet
 from models.customer.membership import Membership
+from models.schemas import ClientCreate, ClientUpdate, ClientResponse
+
+
 
 router = APIRouter()
 
@@ -21,3 +24,20 @@ def get_diets(db: Session = Depends(get_db)):
 @router.get("/memberships/")
 def get_memberships(db: Session = Depends(get_db)):
     return db.query(Membership).all()
+
+
+@router.post("/clients/")
+def create_client(client: ClientCreate, db: Session = Depends(get_db)):
+    new_client = Client(
+    name=client.name,
+    age=client.age,
+    weight=client.weight,
+    height=client.height,
+    gender=client.gender.value,  # ✅ Convert Enum to string
+    membership_id=client.membership_id,
+)
+
+    db.add(new_client)
+    db.commit()
+    db.refresh(new_client)
+    return new_client
