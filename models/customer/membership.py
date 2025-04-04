@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from database import Base
+from database import BaseImport 
+
 
 # ORM Model for Membership table
 class Membership(Base):
