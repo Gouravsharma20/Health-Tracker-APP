@@ -2,7 +2,7 @@ import os
 import time
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker ,Session
 
 # Detect if running inside Docker
 IS_DOCKER = os.getenv("RUNNING_IN_DOCKER", "false").lower() == "true"
@@ -36,3 +36,9 @@ for attempt in range(MAX_RETRIES):
         else:
             print("❌ Failed to connect after multiple attempts. Exiting.")
             exit(1)
+def get_db():
+    db: Session = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

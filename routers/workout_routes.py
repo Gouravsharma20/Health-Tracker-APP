@@ -4,9 +4,12 @@ from models.trainer.workout import Workout
 from models.trainer.trainer import Trainer
 from dependencies import get_db
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/workout",
+    tags=["Workout"]
+)
 
-@router.post("/workouts/")
+@router.post("/")
 def create_workout(workout_type: str, trainer_id: int, db: Session = Depends(get_db)):
     # Check if the trainer exists
     trainer = db.query(Trainer).filter(Trainer.id == trainer_id).first()

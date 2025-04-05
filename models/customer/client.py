@@ -6,7 +6,8 @@ from database import Base
 from models.utils.bmi_utils import calculate_bmi, determine_bmi_category
 from models.customer.diet import clientDietAssociation_table
 from typing import TYPE_CHECKING
-from models.customer.diet import Diet
+from models.customer.diet import diettypeEnum
+from sqlalchemy import Enum as SqlEnum
 if TYPE_CHECKING:
     from models.trainer.workout import Workout
 
@@ -31,7 +32,9 @@ class Client(Base):
     age = Column(Integer, nullable=False)  # Client age
     weight = Column(Float, nullable=False) # Client weight
     height = Column(Float, nullable=False) # Client height
+    gender = Column(SqlEnum(GenderEnum),nullable=False)
     diets = relationship("Diet", secondary=clientDietAssociation_table, back_populates="clients")
+
 
     def get_bmi(self) -> float:
         """Returns the calculated BMI for the client."""

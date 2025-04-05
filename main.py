@@ -1,7 +1,8 @@
 from fastapi import FastAPI
-from routers import router ,trainer_routes
+from routers import trainer_routes, workout_routes, membership_routes
 from database import engine, Base
 from fastapi.responses import HTMLResponse,PlainTextResponse
+from routers import membership_routes
 
 # Creating all database tables
 Base.metadata.create_all(bind=engine)
@@ -9,7 +10,7 @@ Base.metadata.create_all(bind=engine)
 app= FastAPI()
 
 # Including routers for API endpoint
-app.include_router(router) 
+app.include_router(trainer_routes.router) 
 @app.get("/health", response_class=PlainTextResponse)
 def health_check(): 
     """
@@ -18,7 +19,9 @@ def health_check():
     return "Fitness Management System is running!"
 
 
-app.include_router(trainer_routes.router , prefix="/trainer", tags=["Trainer"])
+app.include_router(workout_routes.router)
+app.include_router(membership_routes.router)
+
 
 
 @app.get("/", response_class=HTMLResponse)

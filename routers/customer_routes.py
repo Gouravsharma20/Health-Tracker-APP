@@ -4,7 +4,7 @@ from dependencies import get_db
 from models.customer.client import Client
 from models.customer.diet import Diet
 from models.customer.membership import Membership
-from models.schemas import ClientCreate, ClientUpdate, ClientResponse
+from schemas.client import ClientCreate, ClientUpdate, ClientResponse
 
 
 
@@ -38,7 +38,7 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
 )
     
     for diet_type in client.diets:
-        existing_diet = db.query(Diet).filter(Diet.diet_type == diet_type).first()
+        existing_diet = Diet(diet_type=diet_type)
         if not existing_diet:
             existing_diet = Diet(diet_type=diet_type)
         new_client.diets.append(existing_diet)

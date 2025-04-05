@@ -29,8 +29,6 @@ class Diet(Base):
 
     id = Column(Integer, primary_key=True, index=True)  # Unique diet ID
     diet_type = Column(Enum(diettypeEnum), nullable=False)  # Diet type (e.g., Vegan, Vegetarian)
-    client_id = Column(Integer, ForeignKey("clients.id"))  # Foreign key for client
-    diet_plan = Column(String(12), nullable=False)  # Diet plan details
 
     # Relationship with Client model
     clients = relationship("Client", secondary= clientDietAssociation_table, back_populates="diets")
