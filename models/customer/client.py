@@ -1,16 +1,11 @@
 # Client model representing gym members
-from sqlalchemy import Column, Integer, String, ForeignKey, Enum , Float
-from enum import Enum as PyEnum
+from sqlalchemy import Column, Integer, String, ForeignKey , Float 
 from sqlalchemy.orm import relationship
+from sqlalchemy import Enum as SqlEnum
+from enum import Enum as PyEnum
 from database import Base
 from models.utils.bmi_utils import calculate_bmi, determine_bmi_category
 from models.customer.diet import clientDietAssociation_table
-from typing import TYPE_CHECKING
-from models.customer.diet import diettypeEnum
-from sqlalchemy import Enum as SqlEnum
-if TYPE_CHECKING:
-    from models.trainer.workout import Workout
-
 from models.utils.client_workout_association import clientWorkoutAssociation_table
 
 
@@ -22,7 +17,6 @@ class GenderEnum(str, PyEnum):
     def __str__(self):
         return self.value  # ✅ Ensure correct Enum conversion
 
-
 # ORM Model for Client table
 class Client(Base):
     __tablename__ = "clients"
@@ -32,7 +26,6 @@ class Client(Base):
     age = Column(Integer, nullable=False)  # Client age
     weight = Column(Float, nullable=False) # Client weight
     height = Column(Float, nullable=False) # Client height
-    gender = Column(SqlEnum(GenderEnum),nullable=False)
     diets = relationship("Diet", secondary=clientDietAssociation_table, back_populates="clients")
 
 
@@ -44,7 +37,7 @@ class Client(Base):
         """Returns the BMI category for the client."""
         return determine_bmi_category(self.get_bmi())
 
-    gender = Column(Enum(GenderEnum), nullable=False)  # Client gender
+    gender = Column(SqlEnum(GenderEnum), nullable=False)  # Client gender
     membership_id = Column(Integer, ForeignKey("memberships.id"))  # Foreign key for membership
 
     # Establishing relationship with Membership model

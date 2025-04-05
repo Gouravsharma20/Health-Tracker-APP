@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import trainer_routes, workout_routes, membership_routes
+from routers import trainer_routes, workout_routes, membership_routes, customer_routes  
 from database import engine, Base
 from fastapi.responses import HTMLResponse,PlainTextResponse
 from routers import membership_routes
@@ -21,6 +21,7 @@ def health_check():
 
 app.include_router(workout_routes.router)
 app.include_router(membership_routes.router)
+app.include_router(customer_routes.router)
 
 
 
