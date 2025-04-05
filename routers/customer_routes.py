@@ -36,6 +36,14 @@ def create_client(client: ClientCreate, db: Session = Depends(get_db)):
     gender=client.gender.value,  # ✅ Convert Enum to string
     membership_id=client.membership_id,
 )
+    
+    for diet_type in client.diets:
+        existing_diet = db.query(Diet).filter(Diet.diet_type == diet_type).first()
+        if not existing_diet:
+            existing_diet = Diet(diet_type=diet_type)
+        new_client.diets.append(existing_diet)
+
+
 
     db.add(new_client)
     db.commit()

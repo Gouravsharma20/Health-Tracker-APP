@@ -4,6 +4,13 @@ from enum import Enum as PyEnum
 from sqlalchemy.orm import relationship
 from database import Base
 from models.utils.bmi_utils import calculate_bmi, determine_bmi_category
+from models.customer.diet import clientDietAssociation_table
+from typing import TYPE_CHECKING
+from models.customer.diet import Diet
+if TYPE_CHECKING:
+    from models.trainer.workout import Workout
+
+from models.utils.client_workout_association import clientWorkoutAssociation_table
 
 
 # Gender enumeration for clients
@@ -24,6 +31,7 @@ class Client(Base):
     age = Column(Integer, nullable=False)  # Client age
     weight = Column(Float, nullable=False) # Client weight
     height = Column(Float, nullable=False) # Client height
+    diets = relationship("Diet", secondary=clientDietAssociation_table, back_populates="clients")
 
     def get_bmi(self) -> float:
         """Returns the calculated BMI for the client."""
@@ -38,3 +46,7 @@ class Client(Base):
 
     # Establishing relationship with Membership model
     membership = relationship("Membership", back_populates="clients")
+
+    diets = relationship("Diet", secondary=clientDietAssociation_table, back_populates="clients")
+    workouts = relationship("Workout",secondary=clientWorkoutAssociation_table,back_populates="clients")
+

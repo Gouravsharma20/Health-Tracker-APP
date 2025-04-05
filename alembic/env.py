@@ -1,4 +1,10 @@
 from logging.config import fileConfig
+from database import Base  # Make sure this imports your declarative base
+from models.customer.client import Client
+from models.customer.diet import Diet
+from models.customer.membership import Membership
+# Add other models if needed
+
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -18,7 +24,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

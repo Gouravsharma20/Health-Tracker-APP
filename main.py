@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import router
+from routers import router ,trainer_routes
 from database import engine, Base
 from fastapi.responses import HTMLResponse,PlainTextResponse
 
@@ -17,6 +17,8 @@ def health_check():
     """
     return "Fitness Management System is running!"
 
+
+app.include_router(trainer_routes.router , prefix="/trainer", tags=["Trainer"])
 
 
 @app.get("/", response_class=HTMLResponse)

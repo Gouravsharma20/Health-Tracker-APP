@@ -1,6 +1,13 @@
 from pydantic import BaseModel, Field
 from models.customer.client import GenderEnum
-from typing import Optional
+from typing import Optional,Literal
+from models.trainer.trainer import SpecializationEnum
+
+
+# ✅ Schema for Trainer model
+class TrainerCreate(BaseModel):
+    name: str = Field(..., max_length=100)
+    specialization: SpecializationEnum
 
 # ✅ Schema for creating a new Client
 class ClientCreate(BaseModel):

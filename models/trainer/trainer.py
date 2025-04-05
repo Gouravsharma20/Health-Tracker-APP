@@ -2,6 +2,7 @@
 from sqlalchemy import Column, Integer, String, Enum
 from database import Base
 from enum import Enum as PyEnum
+from sqlalchemy.orm import relationship
 
 # Specialization types for trainers
 class SpecializationEnum(str, PyEnum):
@@ -16,3 +17,5 @@ class Trainer(Base):
     id = Column(Integer, primary_key=True, index=True)  # Unique trainer ID
     name = Column(String(25), nullable=False)  # Trainer name
     specialization = Column(Enum(SpecializationEnum), nullable=False)  # Specialization field
+    workouts = relationship("Workout", back_populates="trainer")  
+
