@@ -3,7 +3,9 @@ from routers import trainer_routes, workout_routes, membership_routes, customer_
 from database import engine, Base
 from fastapi.responses import HTMLResponse,PlainTextResponse
 from routers import membership_routes
-
+from routers import gym_image_routes
+from routers import owner_routes
+from models.owner.owner_model import Owner
 # Creating all database tables
 Base.metadata.create_all(bind=engine)
 
@@ -22,6 +24,9 @@ def health_check():
 app.include_router(workout_routes.router)
 app.include_router(membership_routes.router)
 app.include_router(customer_routes.router)
+app.include_router(gym_image_routes.router)
+app.include_router(owner_routes.router)
+# Including routers for API endpoint
 
 
 
