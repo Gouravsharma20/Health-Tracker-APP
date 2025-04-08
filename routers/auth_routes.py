@@ -18,15 +18,6 @@ from auth.auth import SignupRequest,get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-@router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(Client).filter(Client.email == form_data.username).first()
-    if not user or not verify_password(form_data.password, user.hashed_password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    token, jti = create_access_token({"sub": user.email})
-    return {"access_token": token, "token_type": "bearer"}
-
 
 @router.post("/signup")
 def signup(payload: SignupRequest, db: Session = Depends(get_db)):
@@ -47,6 +38,15 @@ def signup(payload: SignupRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_client)
     return {"msg": "User registered successfully"}
+
+@router.post("/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(Client).filter(Client.email == form_data.username).first()
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    token, jti = create_access_token({"sub": user.email})
+    return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/logout")
 def logout(token: str = Depends(oauth2_scheme)):

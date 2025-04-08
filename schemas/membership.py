@@ -1,19 +1,22 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel
+from typing import Optional,List
 
-# ✅ Schema to create a membership
-class MembershipCreate(BaseModel):
-    membership_type: str = Field(..., max_length=50)
+class MembershipBase(BaseModel):
+    membership_type: str
     price: int
+    benefits: List[str]
 
-# ✅ Schema to update a membership
+class MembershipCreate(MembershipBase):
+    pass
+
 class MembershipUpdate(BaseModel):
-    membership_type: Optional[str] = Field(None, max_length=50)
-    price: Optional[int]
+    membership_type:Optional[str] = None
+    price: Optional[int] = None
+    benefits: Optional[List[str]] = None
 
-# ✅ Schema to return membership data
-class MembershipResponse(MembershipCreate):
+class MembershipResponse(MembershipBase):
     id: int
+    owner_id: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
