@@ -30,7 +30,7 @@ class Diet(Base):
 
     id = Column(Integer, primary_key=True, index=True)  # Unique diet ID
     diet_type = Column(Enum(diettypeEnum), nullable=False)  # Diet type (e.g., Vegan, Vegetarian)
-    diet_plan = Column(String, default= "General Plan", nullable= False)
+    diet_plan = Column(String(255), default= "General Plan", nullable= False)
 
     # Relationship with Client model
     clients = relationship("Client", secondary= clientDietAssociation_table, back_populates="diets")

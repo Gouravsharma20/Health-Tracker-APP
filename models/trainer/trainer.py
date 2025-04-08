@@ -15,7 +15,7 @@ class Trainer(Base):
     __tablename__ = "trainers"
 
     id = Column(Integer, primary_key=True, index=True)  # Unique trainer ID
-    name = Column(String(25), nullable=False)  # Trainer name
+    name = Column(String(25), nullable=False,index=True)  # Trainer name
     specialization = Column(Enum(SpecializationEnum), nullable=False)  # Specialization field
     workouts = relationship("Workout", back_populates="trainer")  
 

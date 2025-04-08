@@ -5,7 +5,10 @@ from fastapi.responses import HTMLResponse,PlainTextResponse
 from routers import membership_routes
 from routers import gym_image_routes
 from routers import owner_routes
+from routers import auth_routes
 from models.owner.owner_model import Owner
+from dotenv import load_dotenv
+load_dotenv
 # Creating all database tables
 Base.metadata.create_all(bind=engine)
 
@@ -26,6 +29,7 @@ app.include_router(membership_routes.router)
 app.include_router(customer_routes.router)
 app.include_router(gym_image_routes.router)
 app.include_router(owner_routes.router)
+app.include_router(auth_routes.router)
 # Including routers for API endpoint
 
 

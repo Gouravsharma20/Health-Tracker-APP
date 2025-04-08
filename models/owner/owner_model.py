@@ -9,7 +9,7 @@ class Owner(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
+    email = Column(String(100), unique=False, nullable=False, index=True)
     password = Column(String(255), nullable=False)  # Hash this in real apps
 
     # Relationship to gym images

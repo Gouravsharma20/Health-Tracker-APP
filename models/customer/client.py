@@ -27,6 +27,9 @@ class Client(Base):
     weight = Column(Float, nullable=False) # Client weight
     height = Column(Float, nullable=False) # Client height
     diets = relationship("Diet", secondary=clientDietAssociation_table, back_populates="clients")
+    email = Column(String(100), unique=False, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+
 
 
     def get_bmi(self) -> float:
@@ -43,6 +46,5 @@ class Client(Base):
     # Establishing relationship with Membership model
     membership = relationship("Membership", back_populates="clients")
 
-    diets = relationship("Diet", secondary=clientDietAssociation_table, back_populates="clients")
     workouts = relationship("Workout",secondary=clientWorkoutAssociation_table,back_populates="clients")
 
