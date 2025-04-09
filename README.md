@@ -1,42 +1,65 @@
-🏋️‍♂️ Fitness Manager App
-A powerful full-stack backend system built with FastAPI, SQLAlchemy, MySQL, and Docker for managing health and fitness efficiently. Designed for clients, trainers, and gym owners, the app provides role-based access, personalized workout & diet plans, secure JWT authentication, Redis-based token blacklisting, and Cloudinary image support.
 
-🚀 Features
-🔐 Authentication & Authorization
-Role-specific JWT-based signup/login for Client, Trainer, and Owner
-Passwords securely hashed using bcrypt
-Token blacklisting using Redis for safe logout
-Swagger UI integration for API testing
-👥 Role-Based Access
-Clients: View workouts & diets, calculate BMI/BMR
-Trainers: Assign workouts based on membership tier & specialization
-Owners: Upload gym images via Cloudinary, manage clients/trainers
-🏋️ Workout & Diet Management
-Many-to-many relationships between clients and diet types
-Support for diet types like: Vegetarian, Vegan, Eggitarian, Mediterranean
-Workouts contain: reps, sets, duration, calories burned
-Trainers assigned based on membership tier & specialization
-🧾 Membership System
-Tiered memberships (e.g., Basic, Gold, Platinum)
-Higher tiers unlock access to more advanced workouts
-Seed membership data via Docker-MySQL
-☁️ Cloudinary Integration
-Upload and store gym images securely
-Fetch and display images with public URLs
-🧱 Tech Stack
-Tech	Description
-FastAPI	Modern Python web framework
-SQLAlchemy	ORM for interacting with MySQL
-MySQL	Relational database backend
-Docker	Containerization
-Redis	Blacklisting access tokens
-Cloudinary	Gym image uploads and storage
-JWT	Secure access tokens with expiration
-📂 Project Structure
+# 🏋️‍♂️ Fitness Manager App
+
+A powerful full-stack backend system built with **FastAPI**, **SQLAlchemy**, **MySQL**, and **Docker** for managing health and fitness efficiently. Designed for **clients**, **trainers**, and **gym owners**, the app provides role-based access, personalized workout & diet plans, secure JWT authentication, Redis-based token blacklisting, and Cloudinary image support.
+
+---
+
+## 🚀 Features
+
+### 🔐 Authentication & Authorization
+- Role-specific JWT-based signup/login for **Client**, **Trainer**, and **Owner**
+- Passwords securely hashed using bcrypt
+- Token blacklisting using Redis for safe logout
+- Swagger UI integration for API testing
+
+### 👥 Role-Based Access
+- **Clients**: View workouts & diets, calculate BMI/BMR
+- **Trainers**: Assign workouts based on membership tier & specialization
+- **Owners**: Upload gym images via Cloudinary, manage clients/trainers
+
+### 🏋️ Workout & Diet Management
+- Many-to-many relationships between clients and diet types
+- Support for diet types like: Vegetarian, Vegan, Eggitarian, Mediterranean
+- Workouts contain: reps, sets, duration, calories burned
+- Trainers assigned based on membership tier & specialization
+
+### 🧾 Membership System
+- Tiered memberships (e.g., Basic, Gold, Platinum)
+- Higher tiers unlock access to more advanced workouts
+- Seed membership data via Docker-MySQL
+
+### ☁️ Cloudinary Integration
+- Upload and store gym images securely
+- Fetch and display images with public URLs
+
+---
+
+## 🧱 Tech Stack
+
+| Tech           | Description                          |
+|----------------|--------------------------------------|
+| **FastAPI**    | Modern Python web framework          |
+| **SQLAlchemy** | ORM for interacting with MySQL       |
+| **MySQL**      | Relational database backend          |
+| **Docker**     | Containerization                     |
+| **Redis**      | Blacklisting access tokens           |
+| **Cloudinary** | Gym image uploads and storage        |
+| **JWT**        | Secure access tokens with expiration |
+
+---
+
+## 📂 Project Structure
+
 healthTrackerApp/ ├── main.py ├── database.py ├── dependencies.py ├── models/ │ ├── client/ │ ├── owner/ │ ├── trainer/ │ └── utils/ ├── routes/ │ ├── auth/ │ ├── core/ │ ├── general/ │ └── users/ ├── schemas/ │ ├── client.py │ ├── trainer.py │ ├── owner.py │ ├── membership.py │ └── diet.py ├── auth/ │ ├── auth.py │ ├── client_auth_utils.py │ ├── trainer_auth_utils.py │ └── owner_auth_utils.py ├── utils/ │ └── redis_connection.py ├── Dockerfile ├── docker-compose.yml ├── .env
 
-⚙️ Setup Instructions
-1. Clone the repository
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1. Clone the repository
+```bash
 git clone https://github.com/your-username/fitness-manager-app.git
 cd fitness-manager-app
 
@@ -113,3 +136,5 @@ Gourav Sharma
 
 📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+
