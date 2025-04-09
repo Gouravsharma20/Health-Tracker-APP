@@ -1,20 +1,26 @@
-from pydantic import BaseModel, Field
-from typing import Optional
-from models.customer.client import GenderEnum
-from models.customer.diet import diettypeEnum
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
+from models.client.client import GenderEnum
+from models.client.diet import diettypeEnum
 from schemas.membership import MembershipResponse
 from schemas.diet import DietResponse
-from typing import List
 
-class ClientCreate(BaseModel):
+# ✅ Shared base class for reusability
+class ClientBase(BaseModel):
     name: str = Field(..., max_length=25)
     age: int
     weight: float
     height: float
     gender: GenderEnum
     membership_id: int
-    diets: list[diettypeEnum] = []
+    diets: List[diettypeEnum] = []
 
+# ✅ Used in registration
+class ClientCreate(ClientBase):
+    email: EmailStr
+    password: str  # ✅ Include password in creation
+
+# ✅ Used for PATCH/PUT
 class ClientUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=25)
     age: Optional[int] = None
@@ -22,17 +28,14 @@ class ClientUpdate(BaseModel):
     height: Optional[float] = None
     gender: Optional[GenderEnum] = None
     membership_id: Optional[int] = None
+    diets: Optional[List[diettypeEnum]] = None
 
-class ClientResponse(ClientCreate):
+# ✅ Used in GET /client/{id} or /me
+class ClientResponse(ClientBase):
     id: int
-    name: str
-    age: int
-    weight: float
-    height: float
-    gender: GenderEnum
+    email: EmailStr
     membership: Optional[MembershipResponse]
-    diets: List[DietResponse]  # ✅ Accept full diet objects in response
-
+    diets: List[DietResponse]  # Full objects
 
     class Config:
-        from_attributes = True
+        orm_mode = True

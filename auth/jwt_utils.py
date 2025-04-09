@@ -12,11 +12,22 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    jti = str(uuid.uuid4())  # unique token ID
+    jti = str(uuid.uuid4())  # Unique Token ID
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire, "jti": jti})
+    issued_at = datetime.utcnow()
+
+    to_encode.update({
+        "exp": expire,
+        "iat": issued_at,
+        "jti": jti
+    })
+
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt, jti
 
 def decode_token(token: str):
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return payload
+    except JWTError as e:
+        raise JWTError("Invalid or expired token") from e

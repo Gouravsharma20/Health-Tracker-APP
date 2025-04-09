@@ -1,21 +1,20 @@
-# Trainer model for gym trainers and their specializations
-from sqlalchemy import Column, Integer, String, Enum
-from database import Base
-from enum import Enum as PyEnum
-from sqlalchemy.orm import relationship
+# models/trainer/trainer.py
 
-# Specialization types for trainers
-class SpecializationEnum(str, PyEnum):
-    STRENGTH = "Strength Training"
-    CARDIO = "Cardio"
-    YOGA = "Yoga"
+from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy.orm import relationship
+from database import Base
+from models.trainer.specialization_enum import SpecializationEnum  # ✅ Import shared enum
 
 # ORM Model for Trainer table
 class Trainer(Base):
     __tablename__ = "trainers"
 
     id = Column(Integer, primary_key=True, index=True)  # Unique trainer ID
-    name = Column(String(25), nullable=False,index=True)  # Trainer name
-    specialization = Column(Enum(SpecializationEnum), nullable=False)  # Specialization field
-    workouts = relationship("Workout", back_populates="trainer")  
+    name = Column(String(25), nullable=False, index=True)  # Trainer name
+    email = Column(String(100), unique=True, nullable=False, index=True)  # Unique enforced here
+    hashed_password = Column(String(255), nullable=False)  # ✅ Updated for security best practices
+
+    specialization = Column(Enum(SpecializationEnum), nullable=False)  # Specialization (enum)
+    
+    workouts = relationship("Workout", back_populates="trainer")  # Relationship to workouts
 

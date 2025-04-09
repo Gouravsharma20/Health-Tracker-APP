@@ -3,13 +3,13 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from logging.config import fileConfig
 from database import Base  # Make sure this imports your declarative base
-from models.owner.owner_model import Owner
-from models.owner.gym_image_model import GymImage
+from models.owner.owner import Owner
+from models.owner.gym_image import GymImage
 from models.trainer.trainer import Trainer
 from models.trainer.workout import Workout
-from models.customer.client import Client
-from models.customer.membership import Membership
-from models.customer.diet import Diet
+from models.client.client import Client
+from models.client.membership import Membership
+from models.client.diet import Diet
 
 # Add other models if needed
 

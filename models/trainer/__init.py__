@@ -1,3 +1,0 @@
-# Initialize trainer models module
-from models.trainer.trainer import Trainer
-from models.trainer.workout import Workout

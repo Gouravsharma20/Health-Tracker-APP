@@ -1,27 +1,21 @@
 from fastapi import FastAPI
-from database import engine, Base
 from dotenv import load_dotenv
-from routers import (
-    trainer_routes,
-    workout_routes,
-    membership_routes,
-    customer_routes,
-    gym_image_routes,
-    owner_routes,
-    auth_routes,
-    general_routes
-)
 
+from database import engine, Base
+from routers import router as main_router  # Centralized router
+
+# Load environment variables from .env
 load_dotenv()
+
+# Create all tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+# Initialize FastAPI app
+app = FastAPI(
+    title="Health Tracker API",
+    version="1.0.0",
+    description="API for managing clients, trainers, memberships, and workouts in a health tracking system."
+)
 
-# Register routers
-app.include_router(auth_routes.router)
-app.include_router(owner_routes.router)
-app.include_router(trainer_routes.router)
-app.include_router(customer_routes.router)
-app.include_router(membership_routes.router)
-app.include_router(workout_routes.router)
-app.include_router(gym_image_routes.router)
+# Register all routes via centralized router
+app.include_router(main_router)
