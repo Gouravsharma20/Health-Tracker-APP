@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://cdn.dribbble.com/users/324248/screenshots/2928065/media/fecf7a414e83a4b4fc8a3ab379e9c9b5.gif" alt="Fitness App Animation" width="600"/>
+  <img src="media/7kvp.gif" alt="Fitness App Animation" width="600"/>
 </p>
 
 
