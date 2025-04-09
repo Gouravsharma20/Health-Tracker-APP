@@ -1,6 +1,7 @@
 <p align="center">
-  <img src="https://media.giphy.com/media/3o7TKP3mK1OjIuuAbm/giphy.gif" alt="Fitness App Demo" width="70%" />
+  <img src="https://cdn.dribbble.com/users/324248/screenshots/2928065/media/fecf7a414e83a4b4fc8a3ab379e9c9b5.gif" alt="Fitness App Animation" width="600"/>
 </p>
+
 
 <h1 align="center">🏋️‍♂️ Fitness Manager App</h1>
 
