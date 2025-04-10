@@ -1,47 +1,62 @@
-# auth/auth.py
-from pydantic import BaseModel, EmailStr
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError
-from auth.jwt_utils import decode_token
-from dependencies import get_db, redis_client
-from sqlalchemy.orm import Session
-from models.client.client import Client
-from models.trainer.trainer import Trainer
-from models.owner.owner import Owner
+from jose import JWTError, jwt
+from typing import Optional
+from redis import Redis
+import os
+from dotenv import load_dotenv
+from fastapi.security import OAuth2PasswordBearer
 
-# 🔑 Role-specific OAuth2 schemes
+# Load env variables
+load_dotenv()
+
+# Load your secret key and algorithm from environment
+SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+
+# Redis setup for token blacklisting
+redis_client = Redis(host="localhost", port=6379, db=0, decode_responses=True)
+
+# Role-specific OAuth2 schemes (used in Swagger and route protection)
 client_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/client/login")
 trainer_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/trainer/login")
 owner_oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/owner/login")
 
-# ✅ Default alias used in some shared routes (e.g. legacy or client-only)
-oauth2_scheme = client_oauth2_scheme
-
-# 🧰 Generic current client fetcher (used in some routes)
-def get_current_user(token: str = Depends(client_oauth2_scheme), db: Session = Depends(get_db)) -> Client:
+# Decode and validate JWT token
+def verify_token(token: str) -> dict:
     try:
-        payload = decode_token(token)
-        email = payload.get("sub")
-        jti = payload.get("jti")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        jti: Optional[str] = payload.get("jti")
 
-        if not email or not jti:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        if not jti:
+            raise HTTPException(status_code=401, detail="Invalid token: no jti")
 
         if redis_client.get(jti):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has been blacklisted")
+            raise HTTPException(status_code=401, detail="Token is blacklisted")
 
-        user = db.query(Client).filter(Client.email == email).first()
-        if user is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-        return user
-
+        return payload
     except JWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(status_code=401, detail="Could not validate credentials")
 
-# 🧾 Shared schema for signup
-class SignupRequest(BaseModel):
-    name: str
-    email: EmailStr
-    password: str
+# Universal get_current_user
+def get_current_user(token: str = Depends(client_oauth2_scheme)):
+    return verify_token(token)
+
+# Role-based token checkers
+def get_current_client(token: str = Depends(client_oauth2_scheme)):
+    payload = verify_token(token)
+    if payload.get("role") != "client":
+        raise HTTPException(status_code=403, detail="Only clients allowed")
+    return payload
+
+def get_current_trainer(token: str = Depends(trainer_oauth2_scheme)):
+    payload = verify_token(token)
+    if payload.get("role") != "trainer":
+        raise HTTPException(status_code=403, detail="Only trainers allowed")
+    return payload
+
+def get_current_owner(token: str = Depends(owner_oauth2_scheme)):
+    payload = verify_token(token)
+    if payload.get("role") != "owner":
+        raise HTTPException(status_code=403, detail="Only owners allowed")
+    return payload

@@ -1,30 +1,30 @@
-# auth/owner_auth_utils.py
 from fastapi import Depends, HTTPException
-from jose import JWTError
 from sqlalchemy.orm import Session
-from auth.jwt_utils import decode_token
-from dependencies import get_db, redis_client
+
+from auth.auth import get_current_owner  # ✅ Token + role verified
+from dependencies import get_db
 from models.owner.owner import Owner
-from routers.auth.auth_base import oauth2_scheme_owner
+from auth.password_utils import verify_password  # ✅ Ensure this is implemented
 
-def get_current_owner(token: str = Depends(oauth2_scheme_owner), db: Session = Depends(get_db)) -> Owner:
-    try:
-        payload = decode_token(token)
-        email = payload.get("sub")
-        role = payload.get("role")
-        jti = payload.get("jti")
 
-        if not email or role != "owner":
-            raise HTTPException(status_code=401, detail="Invalid owner token")
+# ✅ Used in login
+def authenticate_owner(db: Session, email: str, password: str):
+    owner = db.query(Owner).filter(Owner.email == email).first()
+    if not owner or not verify_password(password, owner.hashed_password):
+        return None
+    return owner
 
-        if redis_client.get(jti):
-            raise HTTPException(status_code=401, detail="Token blacklisted")
 
-        owner = db.query(Owner).filter(Owner.email == email).first()
-        if not owner:
-            raise HTTPException(status_code=404, detail="Owner not found")
+# ✅ Used in /me route — returns full DB Owner instance
+def get_current_owner_user(
+    payload: dict = Depends(get_current_owner), db: Session = Depends(get_db)
+) -> Owner:
+    email = payload.get("sub")
+    if not email:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
 
-        return owner
+    owner = db.query(Owner).filter(Owner.email == email).first()
+    if not owner:
+        raise HTTPException(status_code=404, detail="Owner not found")
 
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    return owner

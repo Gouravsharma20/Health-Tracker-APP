@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from schemas.owner import OwnerCreate, OwnerResponse
 from models.owner.owner import Owner
@@ -9,9 +9,12 @@ from dependencies import get_db, redis_client
 from jose import JWTError
 from datetime import datetime
 from routers.auth.auth_base import oauth2_scheme_owner
-from auth.owner_auth_utils import get_current_owner
+from auth.owner_auth_utils import get_current_owner_user
 
 router = APIRouter(prefix="/auth/owner", tags=["Owner Auth"])
+
+# ✅ Correct use: this is for injecting token later
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/owner/login")
 
 @router.post("/signup")
 def owner_signup(payload: OwnerCreate, db: Session = Depends(get_db)):
@@ -43,10 +46,10 @@ def owner_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
         owner.password = hash_password(form_data.password)
         db.commit()
 
+    # ✅ Make sure to include 'role' here
     token_data = {"sub": owner.email, "role": "owner"}
     token, jti = create_access_token(token_data)
     return {"access_token": token, "token_type": "bearer"}
-
 
 @router.post("/logout")
 def owner_logout(token: str = Depends(oauth2_scheme_owner)):
@@ -62,7 +65,6 @@ def owner_logout(token: str = Depends(oauth2_scheme_owner)):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-
 @router.get("/me", response_model=OwnerResponse)
-def get_owner_profile(current_owner: Owner = Depends(get_current_owner)):
+def get_owner_profile(current_owner: Owner = Depends(get_current_owner_user)):
     return current_owner

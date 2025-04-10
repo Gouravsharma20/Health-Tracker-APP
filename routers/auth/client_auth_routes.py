@@ -1,89 +1,58 @@
-# routers/auth_routes.py or routers/user_routes.py
-
-from fastapi import APIRouter, Depends ,HTTPException
-from auth.auth import oauth2_scheme
-from auth.jwt_utils import decode_token
-from auth.client_auth_utils import get_current_client
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from auth.client_auth_utils import authenticate_client
+from auth.jwt_utils import create_access_token, decode_token, blacklist_token
 from dependencies import redis_client
-from jose import JWTError
-from datetime import timedelta,datetime
-from fastapi.security import OAuth2PasswordRequestForm
+from schemas.client import ClientCreate, ClientResponse
+from models.client.client import Client
 from sqlalchemy.orm import Session
-from models.client import Client
-from auth.password_utils import verify_password, hash_password
-from auth.jwt_utils import create_access_token, decode_token
-from dependencies import get_db
-from routers.auth.auth_base import oauth2_scheme_client
-from schemas.client import ClientCreate
+from database import get_db
+from auth.client_auth_utils import get_current_client_user
 
+router = APIRouter(prefix="/auth/client", tags=["Client Auth"])
 
-router = APIRouter(prefix="/auth", tags=["Auth"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/client/login")  # ✅ Swagger will work
 
-
-@router.post("/signup")
-def signup(payload: ClientCreate, db: Session = Depends(get_db)):
-    existing = db.query(Client).filter(Client.email == payload.email).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Email already exists")
-
-    new_client = Client(
-        name=payload.name,
-        email=payload.email,
-        hashed_password=hash_password(payload.password),
-        age=25,
-        height=170,
-        weight=70,
-        gender="Male"
+@router.post("/signup", response_model=ClientResponse)
+def signup(data: ClientCreate, db: Session = Depends(get_db)):
+    existing_user = db.query(Client).filter(Client.email == data.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    new_user = Client(
+        name=data.name,
+        email=data.email,
+        hashed_password=data.hashed_password,
     )
-    db.add(new_client)
+    db.add(new_user)
     db.commit()
-    db.refresh(new_client)
-    return {"msg": "User registered successfully"}
+    db.refresh(new_user)
+    return new_user
 
 @router.post("/login")
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(Client).filter(Client.email == form_data.username).first()
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = authenticate_client(db, form_data.username, form_data.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
-    is_valid, needs_rehash = verify_password(form_data.password, user.hashed_password)
-    if not is_valid:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-
-    if needs_rehash:
-        user.hashed_password = hash_password(form_data.password)
-        db.commit()
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     token_data = {"sub": user.email, "role": "client"}
     token, jti = create_access_token(token_data)
-    return {"access_token": token, "token_type": "bearer"}
+    redis_client.set(jti, "active")
 
+    return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/logout")
 def logout(token: str = Depends(oauth2_scheme)):
-    """
-    Logs out the user by blacklisting the JWT using its unique identifier (jti).
-    """
     try:
         payload = decode_token(token)
         jti = payload.get("jti")
-        exp = payload.get("exp")  # ✅ Extract expiration timestamp from JWT
-        if jti and exp:
-            # ✅ Calculate remaining TTL
-            current_time = int(datetime.utcnow().timestamp())  
-            ttl = exp - current_time
-            if ttl > 0:
-                redis_client.setex(jti, ttl, "blacklisted")
-                return {"msg": "Successfully logged out"}
-            else:
-                raise HTTPException(status_code=400, detail="Token already expired")
-        raise HTTPException(status_code=400, detail="Token jti or exp missing")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        if jti:
+            blacklist_token(jti)
+            return {"msg": "Logout successful"}
+        else:
+            raise HTTPException(status_code=400, detail="Token missing jti")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/me")
-def get_profile(current_user = Depends(get_current_client)):
-    return {
-        "name": current_user.name,
-        "email": current_user.email
-    }
+@router.get("/me", response_model=ClientResponse)
+def read_clients_me(current_user: Client = Depends(get_current_client_user)):
+    return current_user

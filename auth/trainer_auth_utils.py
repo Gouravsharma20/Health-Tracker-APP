@@ -1,30 +1,30 @@
-# auth/trainer_auth_utils.py
 from fastapi import Depends, HTTPException
-from jose import JWTError
 from sqlalchemy.orm import Session
-from auth.jwt_utils import decode_token
-from dependencies import get_db, redis_client
+
+from auth.auth import get_current_trainer  # ✅ Verifies role = trainer
+from dependencies import get_db
 from models.trainer.trainer import Trainer
-from routers.auth.auth_base import oauth2_scheme_trainer
+from auth.password_utils import verify_password  # ✅ Make sure this exists
 
-def get_current_trainer(token: str = Depends(oauth2_scheme_trainer), db: Session = Depends(get_db)) -> Trainer:
-    try:
-        payload = decode_token(token)
-        email = payload.get("sub")
-        role = payload.get("role")
-        jti = payload.get("jti")
 
-        if not email or role != "trainer":
-            raise HTTPException(status_code=401, detail="Invalid trainer token")
+# ✅ Used in login
+def authenticate_trainer(db: Session, email: str, password: str):
+    trainer = db.query(Trainer).filter(Trainer.email == email).first()
+    if not trainer or not verify_password(password, trainer.hashed_password):
+        return None
+    return trainer
 
-        if redis_client.get(jti):
-            raise HTTPException(status_code=401, detail="Token blacklisted")
 
-        trainer = db.query(Trainer).filter(Trainer.email == email).first()
-        if not trainer:
-            raise HTTPException(status_code=404, detail="Trainer not found")
+# ✅ Used in /me route — returns actual Trainer object from DB
+def get_current_trainer_user(
+    payload: dict = Depends(get_current_trainer), db: Session = Depends(get_db)
+) -> Trainer:
+    email = payload.get("sub")
+    if not email:
+        raise HTTPException(status_code=401, detail="Invalid token payload")
 
-        return trainer
+    trainer = db.query(Trainer).filter(Trainer.email == email).first()
+    if not trainer:
+        raise HTTPException(status_code=404, detail="Trainer not found")
 
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+    return trainer

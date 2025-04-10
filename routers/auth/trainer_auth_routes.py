@@ -1,16 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime
 from jose import JWTError
-from schemas.trainer import TrainerResponse 
+
+from schemas.trainer import TrainerResponse, TrainerCreate
 from models.trainer.trainer import Trainer
-from schemas.trainer import TrainerCreate
 from dependencies import get_db, redis_client
 from auth.password_utils import hash_password, verify_password
 from auth.jwt_utils import create_access_token, decode_token
-from auth.trainer_auth_utils import get_current_trainer
-from routers.auth.auth_base import oauth2_scheme_trainer
+from auth.trainer_auth_utils import get_current_trainer_user
+
+# ✅ This is correct usage now
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/trainer/login")
 
 router = APIRouter(prefix="/auth/trainer", tags=["Trainer Auth"])
 
@@ -47,12 +49,13 @@ def trainer_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session 
         trainer.hashed_password = hash_password(form_data.password)
         db.commit()
 
+    # ✅ Add role to token!
     token_data = {"sub": trainer.email, "role": "trainer"}
     token, jti = create_access_token(token_data)
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/logout")
-def trainer_logout(token: str = Depends(oauth2_scheme_trainer)):
+def trainer_logout(token: str = Depends(oauth2_scheme)):  # ✅ use `oauth2_scheme` not oauth2_scheme_trainer unless it's defined elsewhere
     try:
         payload = decode_token(token)
         jti = payload.get("jti")
@@ -66,5 +69,5 @@ def trainer_logout(token: str = Depends(oauth2_scheme_trainer)):
         raise HTTPException(status_code=401, detail="Invalid token")
     
 @router.get("/me", response_model=TrainerResponse)
-def get_trainer_profile(current_trainer: Trainer = Depends(get_current_trainer)):
+def get_trainer_profile(current_trainer: Trainer = Depends(get_current_trainer_user)):
     return current_trainer

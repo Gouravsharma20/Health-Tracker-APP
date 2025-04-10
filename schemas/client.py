@@ -38,4 +38,4 @@ class ClientResponse(ClientBase):
     diets: List[DietResponse]  # Full objects
 
     class Config:
-        orm_mode = True
+        from_attributes = True
