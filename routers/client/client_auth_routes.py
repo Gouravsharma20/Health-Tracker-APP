@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from auth.client_auth_utils import authenticate_client
 from auth.jwt_utils import create_access_token, decode_token, blacklist_token
 from dependencies import redis_client
-from schemas.client import ClientCreate, ClientResponse
+from models.client.client import ClientCreate,ClientResponse
 from models.client.client import Client
 from sqlalchemy.orm import Session
 from database import get_db

@@ -2,7 +2,7 @@ from enum import Enum as PyEnum
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from database import Base
-
+from pydantic import BaseModel
 from models.client.diet import clientDietAssociation_table
 from models.utils.client_workout_association import clientWorkoutAssociation_table
 from models.utils.bmi_utils import calculate_bmi, determine_bmi_category
@@ -17,6 +17,31 @@ class GenderEnum(str, PyEnum):
 
     def __str__(self):
         return self.value
+    
+class ClientCreate(BaseModel):
+    name: str
+    age: int
+    weight: float
+    height: float
+    email: str
+    gender: GenderEnum
+    password: str  # You may want to hash this before saving to the database
+
+    class Config:
+        orm_mode = True
+    
+class ClientResponse(BaseModel):
+    id: int
+    name: str
+    age: int
+    weight: float
+    height: float
+    email: str
+    gender: GenderEnum
+
+    class Config:
+        orm_mode = True
+
 
 
 class Client(Base):

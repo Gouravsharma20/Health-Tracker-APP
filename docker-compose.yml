@@ -1,39 +1,53 @@
-# version: '3.8'  # <-- REMOVE THIS LINE - it's obsolete
-
 services:
-  fastapi-app:
+  app:
     build: .
-    container_name: fastapi-app
-    depends_on:
-      db: # Use the service name 'db' here
-        condition: service_healthy # Correctly waits for the healthcheck
+    container_name: fitness-app
     ports:
       - "8000:8000"
+    depends_on:
+      - db
+      - redis
     environment:
-      # This correctly uses the service name 'db' as the hostname
-      - DATABASE_URL=mysql+pymysql://root:Gourav12345@db:3306/healthTrackerApp
-    volumes:
-      - .:/app
-    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] # Added --reload for dev
+      CLOUDINARY_CLOUD_NAME: dvvrff2pf
+      CLOUDINARY_API_KEY: 814276854344398
+      CLOUDINARY_API_SECRET: Gyi-o_es6an1-mpkVfWjXj6QTKc
+      CLOUDINARY_URL: cloudinary://814276854344398:Gyi-o_es6an1-mpkVfWjXj6QTKc@dvvrff2pf
 
-  db: # <-- This is the service name used in DATABASE_URL and depends_on
-    image: mysql:latest
-    container_name: mysql-db # This is just the container name, not the network hostname
+      SECRET_KEY: 2af97720e443f9db3b3b9b05633fb737f9441b560fe052f16dab513fb76327c4
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+
+      BCRYPT_ROUNDS: 12
+      PEPPER_KEY: s0m3-r@nd0m-pepp3r-v@lu3
+
+      DB_USER: root
+      DB_PASSWORD: Gourav12345
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: healthTrackerApp
+
+      REDIS_URL: redis://redis:6379/1
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
     restart: always
-    healthcheck:
-      # Use the environment variable directly in the healthcheck
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$$MYSQL_ROOT_PASSWORD"]
-      interval: 5s
-      timeout: 20s
-      retries: 10
-      start_period: 10s # Give MySQL some time to initialize before first check
     environment:
       MYSQL_ROOT_PASSWORD: Gourav12345
       MYSQL_DATABASE: healthTrackerApp
     ports:
-      - "3306:3306" # Maps host 3306 to container 3306 (optional for app, good for external tools)
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
 
+  redis:
+    image: redis:7.2
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
 volumes:
   mysql_data:
+  redis_data:

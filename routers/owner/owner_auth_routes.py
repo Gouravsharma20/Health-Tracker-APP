@@ -8,7 +8,7 @@ from auth.jwt_utils import create_access_token, decode_token
 from dependencies import get_db, redis_client
 from jose import JWTError
 from datetime import datetime
-from routers.auth.auth_base import oauth2_scheme_owner
+from auth.auth_base import oauth2_scheme_owner
 from auth.owner_auth_utils import get_current_owner_user
 
 router = APIRouter(prefix="/auth/owner", tags=["Owner Auth"])

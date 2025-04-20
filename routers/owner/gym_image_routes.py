@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from models.owner.gym_image import GymImage
 from database import get_db
 import cloudinary.uploader
-from schemas.gym_image import GymImageCreate, GymImageResponse
+from routers.owner.gym_image import GymImageCreate, GymImageResponse
 
 router = APIRouter(tags=["Owner"])
 

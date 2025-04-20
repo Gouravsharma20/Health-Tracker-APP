@@ -4,7 +4,7 @@ from database import get_db
 from models.client.membership import Membership
 from models.owner.owner import Owner
 from models.client.client import Client
-from schemas.membership import MembershipCreate, MembershipUpdate, MembershipResponse
+from routers.client.membership import MembershipCreate, MembershipUpdate, MembershipResponse
 from auth.owner_auth_utils import get_current_owner
 
 router = APIRouter(prefix="/memberships", tags=["Memberships"])

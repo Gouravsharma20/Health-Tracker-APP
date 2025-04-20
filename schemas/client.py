@@ -2,8 +2,8 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, List
 from models.client.client import GenderEnum
 from models.client.diet import diettypeEnum
-from schemas.membership import MembershipResponse
-from schemas.diet import DietResponse
+from routers.client.membership import MembershipResponse
+from routers.client.diet import DietResponse
 
 # ✅ Shared base class for reusability
 class ClientBase(BaseModel):

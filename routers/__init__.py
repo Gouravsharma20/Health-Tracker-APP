@@ -1,13 +1,13 @@
 from fastapi import APIRouter
-from routers.users.client_routes import router as client_router
-from routers.users.trainer_routes import router as trainer_router
-from routers.users.owner_routes import router as owner_router
-from routers.core.workout_routes import router as workout_router
-from routers.core.membership_routes import router as membership_router
-from routers.general.gym_image_routes import router as gym_image_router
-from routers.auth.client_auth_routes import router as client_auth_router
-from routers.auth.trainer_auth_routes import router as trainer_auth_router
-from routers.auth.owner_auth_routes import router as owner_auth_router
+from routers.client.client_auth_routes import router as client_router
+from routers.trainer.trainer_auth_routes import router as trainer_router
+from routers.owner.owner_auth_routes import router as owner_router
+from routers.trainer.workout_routes import router as workout_router
+from routers.owner.membership_routes import router as membership_router
+from routers.owner.gym_image_routes import router as gym_image_router
+from routers.client.client_auth_routes import router as client_auth_router
+from routers.trainer.trainer_auth_routes import router as trainer_auth_router
+from routers.owner.owner_auth_routes import router as owner_auth_router
 
 # Create the main router
 router = APIRouter()
