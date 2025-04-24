@@ -12,8 +12,13 @@ from models.owner.gym_image import GymImage
 from models.trainer.trainer import Trainer
 from models.trainer.workout import Workout
 from routers import test_db
-#from routers.owner.owner_auth_routes import router as owner_auth_routes   
-
+#from routers.owner.owner_auth_routes import router as owner_auth_routes
+from routers.client.client_auth_routes import client_auth_router
+from routers.owner.gym_image_routes import gym_image_router
+from routers.owner.membership_routes import membership_router
+from routers.owner.owner_auth_routes import owner_auth_router
+from routers.trainer.trainer_auth_routes import trainer_auth_router
+from routers.trainer.workout_routes import workout_router
 
 
 from database import engine, Base
@@ -35,6 +40,12 @@ app = FastAPI(
 
 #app.include_router(owner_auth_routes)
 app.include_router(test_db.router)
+app.include_router(client_auth_router)
+app.include_router(gym_image_router)
+app.include_router(membership_router)
+app.include_router(owner_auth_router)
+app.include_router(trainer_auth_router)
+app.include_router(workout_router)
 
 # Serve static assets and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")

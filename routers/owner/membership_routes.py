@@ -7,15 +7,15 @@ from models.client.client import Client
 from routers.client.membership import MembershipCreate, MembershipUpdate, MembershipResponse
 from auth.owner_auth_utils import get_current_owner
 
-router = APIRouter(prefix="/memberships", tags=["Memberships"])
+membership_router = APIRouter(prefix="/memberships", tags=["Owner"])
 
 # ✅ 1. PUBLIC: Get all memberships (global list)
-@router.get("/", response_model=list[MembershipResponse])
+@membership_router.get("/", response_model=list[MembershipResponse])
 def get_all_memberships(db: Session = Depends(get_db)):
     return db.query(Membership).all()
 
 # ✅ 2. PUBLIC: Get a specific membership by ID
-@router.get("/{membership_id}", response_model=MembershipResponse)
+@membership_router.get("/{membership_id}", response_model=MembershipResponse)
 def get_membership(membership_id: int, db: Session = Depends(get_db)):
     membership = db.query(Membership).filter(Membership.id == membership_id).first()
     if not membership:
@@ -23,7 +23,7 @@ def get_membership(membership_id: int, db: Session = Depends(get_db)):
     return membership
 
 # ✅ 3. OWNER-ONLY: Create membership
-@router.post("/owners/{owner_id}/", response_model=MembershipResponse)
+@membership_router.post("/owners/{owner_id}/", response_model=MembershipResponse)
 def create_membership_for_owner(
     owner_id: int,
     membership: MembershipCreate,
@@ -40,7 +40,7 @@ def create_membership_for_owner(
     return new_membership
 
 # ✅ 4. OWNER-ONLY: Get all memberships for a specific owner
-@router.get("/owners/{owner_id}/", response_model=list[MembershipResponse])
+@membership_router.get("/owners/{owner_id}/", response_model=list[MembershipResponse])
 def get_memberships_by_owner(
     owner_id: int,
     db: Session = Depends(get_db),
@@ -52,7 +52,7 @@ def get_memberships_by_owner(
     return db.query(Membership).filter(Membership.owner_id == owner_id).all()
 
 # ✅ 5. OWNER-ONLY: Update a membership
-@router.put("/{membership_id}", response_model=MembershipResponse)
+@membership_router.put("/{membership_id}", response_model=MembershipResponse)
 def update_membership(
     membership_id: int,
     updated: MembershipUpdate,
@@ -73,7 +73,7 @@ def update_membership(
     return membership
 
 # ✅ 6. OWNER-ONLY: Partial update
-@router.patch("/{membership_id}", response_model=MembershipResponse)
+@membership_router.patch("/{membership_id}", response_model=MembershipResponse)
 def partial_update_membership(
     membership_id: int,
     update_data: MembershipUpdate,
@@ -94,7 +94,7 @@ def partial_update_membership(
     return membership
 
 # ✅ 7. OWNER-ONLY: Delete membership
-@router.delete("/{membership_id}")
+@membership_router.delete("/{membership_id}")
 def delete_membership(
     membership_id: int,
     db: Session = Depends(get_db),
@@ -111,7 +111,7 @@ def delete_membership(
     return {"message": "Membership deleted successfully"}
 
 # ✅ 8. OWNER-ONLY: Assign membership to client
-@router.post("/assign/{client_id}/{membership_id}")
+@membership_router.post("/assign/{client_id}/{membership_id}")
 def assign_membership_to_client(
     client_id: int,
     membership_id: int,

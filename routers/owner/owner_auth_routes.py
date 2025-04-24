@@ -11,12 +11,12 @@ from datetime import datetime
 from auth.auth_base import oauth2_scheme_owner
 from auth.owner_auth_utils import get_current_owner_user
 
-router = APIRouter(prefix="/auth/owner", tags=["Owner Auth"])
+owner_auth_router = APIRouter(prefix="/auth/owner", tags=["Owner"])
 
 # ✅ Correct use: this is for injecting token later
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/owner/login")
 
-@router.post("/signup")
+@owner_auth_router.post("/signup")
 def owner_signup(payload: OwnerCreate, db: Session = Depends(get_db)):
     existing = db.query(Owner).filter(Owner.email == payload.email).first()
     if existing:
@@ -32,7 +32,7 @@ def owner_signup(payload: OwnerCreate, db: Session = Depends(get_db)):
     db.refresh(new_owner)
     return {"msg": "Owner registered successfully"}
 
-@router.post("/login")
+@owner_auth_router.post("/login")
 def owner_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     owner = db.query(Owner).filter(Owner.email == form_data.username).first()
     if not owner:
@@ -51,7 +51,7 @@ def owner_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     token, jti = create_access_token(token_data)
     return {"access_token": token, "token_type": "bearer"}
 
-@router.post("/logout")
+@owner_auth_router.post("/logout")
 def owner_logout(token: str = Depends(oauth2_scheme_owner)):
     try:
         payload = decode_token(token)
@@ -65,6 +65,6 @@ def owner_logout(token: str = Depends(oauth2_scheme_owner)):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-@router.get("/me", response_model=OwnerResponse)
+@owner_auth_router.get("/me", response_model=OwnerResponse)
 def get_owner_profile(current_owner: Owner = Depends(get_current_owner_user)):
     return current_owner

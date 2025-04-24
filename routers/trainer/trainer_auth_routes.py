@@ -14,9 +14,12 @@ from auth.trainer_auth_utils import get_current_trainer_user
 # ✅ This is correct usage now
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/trainer/login")
 
-router = APIRouter(prefix="/auth/trainer", tags=["Trainer Auth"])
+trainer_auth_router = APIRouter(
+    prefix="/auth/trainer",
+      tags=["Trainer"]
+    )
 
-@router.post("/signup")
+@trainer_auth_router.post("/signup")
 def trainer_signup(payload: TrainerCreate, db: Session = Depends(get_db)):
     existing = db.query(Trainer).filter(Trainer.email == payload.email).first()
     if existing:
@@ -35,7 +38,7 @@ def trainer_signup(payload: TrainerCreate, db: Session = Depends(get_db)):
     db.refresh(new_trainer)
     return {"msg": "Trainer registered successfully"}
 
-@router.post("/login")
+@trainer_auth_router.post("/login")
 def trainer_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     trainer = db.query(Trainer).filter(Trainer.email == form_data.username).first()
     if not trainer:
@@ -54,7 +57,7 @@ def trainer_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session 
     token, jti = create_access_token(token_data)
     return {"access_token": token, "token_type": "bearer"}
 
-@router.post("/logout")
+@trainer_auth_router.post("/logout")
 def trainer_logout(token: str = Depends(oauth2_scheme)):  # ✅ use `oauth2_scheme` not oauth2_scheme_trainer unless it's defined elsewhere
     try:
         payload = decode_token(token)
@@ -68,6 +71,6 @@ def trainer_logout(token: str = Depends(oauth2_scheme)):  # ✅ use `oauth2_sche
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     
-@router.get("/me", response_model=TrainerResponse)
+@trainer_auth_router.get("/me", response_model=TrainerResponse)
 def get_trainer_profile(current_trainer: Trainer = Depends(get_current_trainer_user)):
     return current_trainer

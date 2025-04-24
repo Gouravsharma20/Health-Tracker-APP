@@ -4,7 +4,7 @@ from jose import jwt, JWTError
 from redis import Redis
 from dotenv import load_dotenv
 import os
-
+from dependencies import redis_client
 load_dotenv()
 
 # OAuth2 schemes for different roles

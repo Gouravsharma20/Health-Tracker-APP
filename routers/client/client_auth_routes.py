@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from auth.client_auth_utils import authenticate_client
 from auth.jwt_utils import create_access_token, decode_token, blacklist_token
@@ -8,27 +8,40 @@ from models.client.client import Client
 from sqlalchemy.orm import Session
 from database import get_db
 from auth.client_auth_utils import get_current_client_user
+from auth.password_utils import hash_password
+from dependencies import redis_client
+import traceback
+import mysql.connector
+import os
 
-router = APIRouter(prefix="/auth/client", tags=["Client Auth"])
+client_auth_router = APIRouter(prefix="/auth/client", tags=["Client"])
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/client/login")  # ✅ Swagger will work
 
-@router.post("/signup", response_model=ClientResponse)
-def signup(data: ClientCreate, db: Session = Depends(get_db)):
+@client_auth_router.post("/signup", response_model=ClientResponse)
+async def signup(
+    data: ClientCreate,
+    db: Session = Depends(get_db),
+    request: Request = None
+):
     existing_user = db.query(Client).filter(Client.email == data.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     new_user = Client(
-        name=data.name,
-        email=data.email,
-        hashed_password=data.hashed_password,
+        name = data.name,
+        age = data.age,
+        weight = data.weight,
+        height = data.height,
+        gender = data.gender,
+        email = data.email,
+        hashed_password = hash_password(data.password)
     )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     return new_user
 
-@router.post("/login")
+@client_auth_router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_client(db, form_data.username, form_data.password)
     if not user:
@@ -40,7 +53,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 
     return {"access_token": token, "token_type": "bearer"}
 
-@router.post("/logout")
+@client_auth_router.post("/logout")
 def logout(token: str = Depends(oauth2_scheme)):
     try:
         payload = decode_token(token)
@@ -53,6 +66,6 @@ def logout(token: str = Depends(oauth2_scheme)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/me", response_model=ClientResponse)
+@client_auth_router.get("/me", response_model=ClientResponse)
 def read_clients_me(current_user: Client = Depends(get_current_client_user)):
     return current_user
