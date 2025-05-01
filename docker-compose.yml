@@ -21,10 +21,10 @@ services:
       PEPPER_KEY: s0m3-r@nd0m-pepp3r-v@lu3
 
       DB_USER: root
-      DB_PASSWORD: Gourav12345
+      DB_PASSWORD: Sharma12345
       DB_HOST: db
       DB_PORT: 3306
-      DB_NAME: healthTrackerApp
+      DB_NAME: helthTrackerApp
 
       REDIS_URL: redis://redis:6379/1
 
@@ -33,8 +33,8 @@ services:
     container_name: mysql-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: Gourav12345
-      MYSQL_DATABASE: healthTrackerApp
+      MYSQL_ROOT_PASSWORD: Sharma12345
+      MYSQL_DATABASE: helthTrackerApp
     ports:
       - "3306:3306"
     volumes:

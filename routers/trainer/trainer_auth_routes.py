@@ -20,12 +20,11 @@ trainer_auth_router = APIRouter(
     )
 
 @trainer_auth_router.post("/signup")
-def trainer_signup(payload: TrainerCreate, db: Session = Depends(get_db)):
+async def trainer_signup(payload: TrainerCreate, db: Session = Depends(get_db)):
     existing = db.query(Trainer).filter(Trainer.email == payload.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
-
-    new_trainer = Trainer(
+    new_trainer = Trainer(    
         name=payload.name,
         email=payload.email,
         hashed_password=hash_password(payload.password),
@@ -33,13 +32,16 @@ def trainer_signup(payload: TrainerCreate, db: Session = Depends(get_db)):
         experience_years=payload.experience_years,
         specialization=payload.specialization
     )
+    
     db.add(new_trainer)
     db.commit()
     db.refresh(new_trainer)
     return {"msg": "Trainer registered successfully"}
 
+    
+
 @trainer_auth_router.post("/login")
-def trainer_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def trainer_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     trainer = db.query(Trainer).filter(Trainer.email == form_data.username).first()
     if not trainer:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -58,7 +60,7 @@ def trainer_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session 
     return {"access_token": token, "token_type": "bearer"}
 
 @trainer_auth_router.post("/logout")
-def trainer_logout(token: str = Depends(oauth2_scheme)):  # ✅ use `oauth2_scheme` not oauth2_scheme_trainer unless it's defined elsewhere
+async def trainer_logout(token: str = Depends(oauth2_scheme)):  # ✅ use `oauth2_scheme` not oauth2_scheme_trainer unless it's defined elsewhere
     try:
         payload = decode_token(token)
         jti = payload.get("jti")
@@ -72,5 +74,5 @@ def trainer_logout(token: str = Depends(oauth2_scheme)):  # ✅ use `oauth2_sche
         raise HTTPException(status_code=401, detail="Invalid token")
     
 @trainer_auth_router.get("/me", response_model=TrainerResponse)
-def get_trainer_profile(current_trainer: Trainer = Depends(get_current_trainer_user)):
+async def get_trainer_profile(current_trainer: Trainer = Depends(get_current_trainer_user)):
     return current_trainer

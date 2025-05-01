@@ -13,8 +13,8 @@ class Trainer(Base):
     name = Column(String(25), nullable=False, index=True)  # Trainer name
     email = Column(String(100), unique=True, nullable=False, index=True)  # Unique enforced here
     hashed_password = Column(String(255), nullable=False)  # ✅ Updated for security best practices
-
+    age = Column(Integer,nullable=False)
+    experience_years = Column(Integer,nullable=False)
     specialization = Column(Enum(SpecializationEnum), nullable=False)  # Specialization (enum)
-    
     workouts = relationship("Workout", back_populates="trainer")  # Relationship to workouts
 
