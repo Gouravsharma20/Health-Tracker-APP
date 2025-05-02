@@ -17,7 +17,7 @@ owner_auth_router = APIRouter(prefix="/auth/owner", tags=["Owner"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/owner/login")
 
 @owner_auth_router.post("/signup")
-def owner_signup(payload: OwnerCreate, db: Session = Depends(get_db)):
+async def owner_signup(payload: OwnerCreate, db: Session = Depends(get_db)):
     existing = db.query(Owner).filter(Owner.email == payload.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
@@ -33,7 +33,7 @@ def owner_signup(payload: OwnerCreate, db: Session = Depends(get_db)):
     return {"msg": "Owner registered successfully"}
 
 @owner_auth_router.post("/login")
-def owner_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def owner_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     owner = db.query(Owner).filter(Owner.email == form_data.username).first()
     if not owner:
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -52,7 +52,7 @@ def owner_login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     return {"access_token": token, "token_type": "bearer"}
 
 @owner_auth_router.post("/logout")
-def owner_logout(token: str = Depends(oauth2_scheme_owner)):
+async def owner_logout(token: str = Depends(oauth2_scheme_owner)):
     try:
         payload = decode_token(token)
         jti = payload.get("jti")
@@ -66,5 +66,5 @@ def owner_logout(token: str = Depends(oauth2_scheme_owner)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @owner_auth_router.get("/me", response_model=OwnerResponse)
-def get_owner_profile(current_owner: Owner = Depends(get_current_owner_user)):
+async def get_owner_profile(current_owner: Owner = Depends(get_current_owner_user)):
     return current_owner

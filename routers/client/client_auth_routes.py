@@ -8,8 +8,8 @@ from models.client.client import Client
 from sqlalchemy.orm import Session
 from database import get_db
 from auth.client_auth_utils import get_current_client_user
-from auth.password_utils import hash_password
-from dependencies import redis_client
+from auth.password_utils import hash_password,verify_password
+from dependencies import redis_client,get_db
 import traceback
 import mysql.connector
 import os
@@ -43,18 +43,26 @@ async def signup(
 
 @client_auth_router.post("/login")
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_client(db, form_data.username, form_data.password)
-    if not user:
+    client = db.query(Client).filter(Client.email == form_data.username).first()
+    if not client:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    
+    is_valid, needs_rehash = verify_password(form_data.password,client.hashed_password)
+    if not is_valid:
+        raise HTTPException(status_code=401,detail="Invalid Credentials")
+    
+    if needs_rehash:
+        client.hashed_password = hash_password(form_data.password)
+        db.commit()
 
-    token_data = {"sub": user.email, "role": "client"}
+    token_data = {"sub": client.email, "role": "client"}
     token, jti = create_access_token(token_data)
     redis_client.set(jti, "active")
 
     return {"access_token": token, "token_type": "bearer"}
 
 @client_auth_router.post("/logout")
-def logout(token: str = Depends(oauth2_scheme)):
+async def logout(token: str = Depends(oauth2_scheme)):
     try:
         payload = decode_token(token)
         jti = payload.get("jti")
@@ -67,5 +75,5 @@ def logout(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=400, detail=str(e))
 
 @client_auth_router.get("/me", response_model=ClientResponse)
-def read_clients_me(current_user: Client = Depends(get_current_client_user)):
+async def read_clients_me(current_user: Client = Depends(get_current_client_user)):
     return current_user

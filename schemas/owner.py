@@ -11,6 +11,7 @@ class OwnerCreate(OwnerBase):
 
 
 class OwnerResponse(OwnerBase):
+    email: EmailStr
     id: int
 
     model_config = {

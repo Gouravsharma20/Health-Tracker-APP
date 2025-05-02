@@ -3,7 +3,6 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime
 from jose import JWTError
-
 from schemas.trainer import TrainerResponse, TrainerCreate
 from models.trainer.trainer import Trainer
 from dependencies import get_db, redis_client

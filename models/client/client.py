@@ -2,7 +2,7 @@ from enum import Enum as PyEnum
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from database import Base
-from pydantic import BaseModel,Field
+from pydantic import BaseModel,Field,EmailStr
 from models.client.diet import clientDietAssociation_table
 from models.utils.client_workout_association import clientWorkoutAssociation_table
 from models.utils.bmi_utils import calculate_bmi, determine_bmi_category
@@ -23,7 +23,7 @@ class ClientCreate(BaseModel):
     age: int
     weight: float
     height: float
-    email: str
+    email: EmailStr
     gender: GenderEnum
     password:str = Field(min_length=8)
 
@@ -36,7 +36,7 @@ class ClientResponse(BaseModel):
     age: int
     weight: float
     height: float
-    email: str
+    email: EmailStr
     gender: GenderEnum
 
     class Config:
